@@ -7,7 +7,8 @@
     "test": "vitest run --dir test/unit",
     "test:watch": "vitest --dir test/unit",
     "test:integration": "vitest run --dir test/integration",
-    "test:integration:watch": "vitest --dir test/integration"
+    "test:integration:watch": "vitest --dir test/integration",
+    "test:all": "vitest run"
   },
   "keywords": [],
   "author": "",
