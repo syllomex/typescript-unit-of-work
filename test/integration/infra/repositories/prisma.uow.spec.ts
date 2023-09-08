@@ -15,7 +15,7 @@ describe('repositories/prisma.unit-of-work', () => {
   it('should rollback changes when an error is thrown', async () => {
     const accountRepository = makeAccountRepository()
     const profileRepository = makeProfileRepository()
-    const uow = makeUnitOfWork(accountRepository, profileRepository)
+    const uow = makeUnitOfWork({ accountRepository, profileRepository })
 
     const account = new Account({
       id: randomUUID(),
@@ -37,7 +37,7 @@ describe('repositories/prisma.unit-of-work', () => {
   it('should commit changes if no error is thrown', async () => {
     const accountRepository = makeAccountRepository()
     const profileRepository = makeProfileRepository()
-    const uow = makeUnitOfWork(accountRepository, profileRepository)
+    const uow = makeUnitOfWork({ accountRepository, profileRepository })
 
     const account = new Account({
       id: randomUUID(),

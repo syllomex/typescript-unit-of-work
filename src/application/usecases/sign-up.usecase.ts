@@ -1,12 +1,14 @@
 import { type AccountRepository, type ProfileRepository, type UnitOfWork } from '@/application/repositories'
+import { type RepositoryPick } from '@/application/repositories/_base.repository'
 import { type CryptoService } from '@/application/services'
 import { Account, Profile } from '@/domain/entities'
 
 export class SignUp {
   constructor(
-    private readonly uow: UnitOfWork,
-    private readonly accountRepository: Pick<AccountRepository, 'save'>,
-    private readonly profileRepository: Pick<ProfileRepository, 'save'>,
+    private readonly uow: UnitOfWork<{
+      accountRepository: RepositoryPick<AccountRepository, 'save'>
+      profileRepository: RepositoryPick<ProfileRepository, 'save'>
+    }>,
     private readonly cryptoService: CryptoService,
   ) {}
 
@@ -24,9 +26,9 @@ export class SignUp {
       name: input.name,
     })
 
-    await this.uow.transaction(async () => {
-      await this.accountRepository.save(account)
-      await this.profileRepository.save(profile)
+    await this.uow.transaction(async ({ accountRepository, profileRepository }) => {
+      await accountRepository.save(account)
+      await profileRepository.save(profile)
     })
 
     return account

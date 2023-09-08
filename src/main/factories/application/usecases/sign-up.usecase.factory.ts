@@ -7,7 +7,7 @@ export const makeSignUp = () => {
   const profileRepository = makeProfileRepository()
   const cryptoService = makeCryptoService()
 
-  const uow = makeUnitOfWork(accountRepository, profileRepository)
+  const uow = makeUnitOfWork({ accountRepository, profileRepository })
 
-  return new SignUp(uow, accountRepository, profileRepository, cryptoService)
+  return new SignUp(uow, cryptoService)
 }

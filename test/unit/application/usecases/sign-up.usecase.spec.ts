@@ -1,5 +1,6 @@
 import { SignUp } from '@/application/usecases'
 import { Account, Profile } from '@/domain/entities'
+import { mockUow } from 'test/mocks/prisma.uow.mock'
 
 const makeMocks = () => {
   const cryptoService = {
@@ -13,24 +14,15 @@ const makeMocks = () => {
     save: vi.fn(),
     transacting: vi.fn(),
   }
-  const transaction = vi.fn().mockImplementation(async (fn: () => Promise<any>) => {
-    accountRepository.transacting(transaction)
-    profileRepository.transacting(transaction)
-    await fn()
-    accountRepository.transacting(null)
-    profileRepository.transacting(null)
-  })
-  const uow = {
-    transaction,
-  }
-  return { cryptoService, accountRepository, profileRepository, transaction, uow }
+  const uow = mockUow({ accountRepository, profileRepository })
+  return { cryptoService, accountRepository, profileRepository, uow }
 }
 
 describe('usecases/sign-up', () => {
   // this test should be splitted into another specific tests in correct folders, but I'm leaving it here for study purpose
   it('should inject unit of work transaction into repositories', async () => {
-    const { uow, accountRepository, profileRepository, cryptoService, transaction } = makeMocks()
-    const signUp = new SignUp(uow, accountRepository, profileRepository, cryptoService)
+    const { uow, accountRepository, profileRepository, cryptoService } = makeMocks()
+    const signUp = new SignUp(uow, cryptoService)
 
     await signUp.perform({
       email: 'any-email',
@@ -40,16 +32,16 @@ describe('usecases/sign-up', () => {
 
     expect(uow.transaction).toHaveBeenCalledOnce()
     expect(accountRepository.transacting).toHaveBeenCalledTimes(2)
-    expect(accountRepository.transacting).toHaveBeenNthCalledWith(1, transaction)
+    expect(accountRepository.transacting).toHaveBeenNthCalledWith(1, uow.transaction)
     expect(accountRepository.transacting).toHaveBeenNthCalledWith(2, null)
     expect(profileRepository.transacting).toHaveBeenCalledTimes(2)
-    expect(profileRepository.transacting).toHaveBeenNthCalledWith(1, transaction)
+    expect(profileRepository.transacting).toHaveBeenNthCalledWith(1, uow.transaction)
     expect(profileRepository.transacting).toHaveBeenNthCalledWith(2, null)
   })
 
   it('should call save methods with correct params', async () => {
     const { uow, accountRepository, profileRepository, cryptoService } = makeMocks()
-    const signUp = new SignUp(uow, accountRepository, profileRepository, cryptoService)
+    const signUp = new SignUp(uow, cryptoService)
 
     const account = await signUp.perform({
       email: 'any-email',

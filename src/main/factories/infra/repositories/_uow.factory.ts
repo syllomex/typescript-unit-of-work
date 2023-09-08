@@ -1,6 +1,7 @@
+import { type BaseRepository } from '@/application/repositories/_base.repository'
 import { prisma } from '@/infra/lib/prisma'
-import { PrismaUnitOfWork, type BaseRepository } from '@/infra/repositories/prisma'
+import { PrismaUnitOfWork } from '@/infra/repositories/prisma'
 
-export const makeUnitOfWork = (...repositories: BaseRepository[]) => {
-  return new PrismaUnitOfWork(prisma, ...repositories)
+export const makeUnitOfWork = <Repositories extends Record<string, BaseRepository>>(repositories: Repositories) => {
+  return new PrismaUnitOfWork<Repositories>(prisma, repositories)
 }
